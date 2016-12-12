@@ -94,8 +94,9 @@ public class SweeperManager : MonoBehaviour {
 			ToggleMenu();
 		} else {
 			// Do losing stuff
-			field.blowMines(final.transform.position);
+			field.blowMines(final.transform.position, true);
 			yield return new WaitForSeconds (3);
+			field.blowMines(final.transform.position, false);
 			ToggleMenu ();
 		}
 		gameHasStarted = false;

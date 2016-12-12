@@ -157,23 +157,40 @@ public class BlockField : MonoBehaviour {
 		}
 	}
 
-	public void blowMines( Vector3 origin){
-		
-		for (int i = 0; i < tiles.Length; i++) {
-			tiles [i].rbody.isKinematic = false;
-			if (tiles [i].hasMine) {
-				tiles [i].blowMine ();
-			}
-		}
-		for (int i = 0; i < tiles.Length; i++) {
-			if (tiles [i].hasMine) {
-				origin = tiles [i].transform.position;
-				origin.z = origin.z + Random.Range(-1f,1f);
-				for (int j = 0; j < tiles.Length; j++) {
-					tiles [j].rbody.AddExplosionForce (50f, origin, PLAY_AREA_SIZE);
+	public void blowMines( Vector3 origin, bool justReveal ){
+		if (justReveal) {
+			for (int i = 0; i < tiles.Length; i++) {
+				//tiles [i].rbody.isKinematic = false;
+				if (tiles [i].hasMine) {
+					tiles [i].blowMine ();
 				}
-
 			}
+		} else {
+			for (int i = 0; i < tiles.Length; i++) {
+				tiles [i].rbody.isKinematic = false;
+			}
+			origin.z = origin.z + Random.Range (-2f, 0f);
+			for (int j = 0; j < tiles.Length; j++) {
+				if (tiles [j].hasMine) {
+					tiles [j].TileCollider.enabled = false;
+				}
+				tiles [j].isFlashing = false;
+				tiles [j].rbody.AddExplosionForce (500f, origin, PLAY_AREA_SIZE);
+			}
+			/*
+			for (int i = 0; i < tiles.Length; i++) {
+				if (tiles [i].hasMine) {
+					tiles [i].TileCollider.enabled = false;
+					tiles [i].isFlashing = false;
+					origin = tiles [i].transform.position;
+					origin.z = origin.z + Random.Range (-1f, .75f);
+					for (int j = 0; j < tiles.Length; j++) {
+						tiles [j].rbody.AddExplosionForce (50f, origin, PLAY_AREA_SIZE);
+					}
+
+				}
+			}
+			*/
 		}
 	}
 

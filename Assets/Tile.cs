@@ -19,6 +19,12 @@ public class Tile : MonoBehaviour
 	public Material standardMaterial;
 	public Material activeMaterial;
 
+	public Renderer mineRenderer;
+	public Material standardMineMaterial;
+	public Material activeMineMaterial;
+
+	public BoxCollider TileCollider;
+
 	public GameObject _block;
 	//private GameObject _tile;
 	public GameObject _mine;
@@ -43,7 +49,16 @@ public class Tile : MonoBehaviour
 
 	private int cascadeTime = 0;
 
+	public bool isFlashing = false;
+	private float flashStartTime = 0f;
+	private float flashDuration = 3f;
+	private float flashSpeed = 1f;
+
 	public void reset(){
+		flashSpeed = 1f;
+		mineRenderer.material = standardMineMaterial;
+		isFlashing = false;
+		TileCollider.enabled = true;
 		rbody.isKinematic = true;
 		setText ("");
 		_block.SetActive (true);
@@ -54,6 +69,7 @@ public class Tile : MonoBehaviour
 		flagged = false;
 		_flag.SetActive (flagged);
 		setActive (false);
+		_mine.transform.rotation = Random.rotation;
 	}
 
 	void Awake ()
@@ -67,7 +83,16 @@ public class Tile : MonoBehaviour
 		_block.transform.localPosition = untouchedPosition;
 		setText ("");
 	}
-
+	void Update () {
+		if (isFlashing) {
+			if (Mathf.PingPong(Time.time - flashStartTime,.5f) > .25f) {
+				mineRenderer.material = activeMineMaterial;
+				flashSpeed = flashSpeed * .5f;
+			} else {
+				mineRenderer.material = standardMineMaterial;
+			}
+		}
+	}
 	public void onPointOver(){
 		if (_field.manager.gameHasStarted) {
 			if (status != BlockStatus.CLEARED && status != BlockStatus.MINED) {
@@ -159,10 +184,13 @@ public class Tile : MonoBehaviour
 	}
 
 	public void blowMine(){
+		flashStartTime = Time.time;
+		isFlashing = true;
+		//TileCollider.enabled = false;
 		_flag.SetActive (false);
 		_block.SetActive (false);
 		_mine.SetActive (true);
-		rbody.isKinematic = false;
+		//rbody.isKinematic = false;
 	}
 
 	public void updateNeighbors ()
