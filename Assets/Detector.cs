@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Detector : MonoBehaviour {
-	/*
+namespace Mines
+{
+	public class Detector : MonoBehaviour
+	{
+		/*
 	public GameObject detectorPrefab;
 
 	public Tile detected;
@@ -121,4 +124,5 @@ public class Detector : MonoBehaviour {
 		}
 	}
 	*/
+	}
 }
