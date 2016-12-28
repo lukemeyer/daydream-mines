@@ -592,7 +592,8 @@ public class GvrVideoPlayerTexture : MonoBehaviour {
     if (processingRunning) {
       Debug.LogError("CallPluginAtEndOfFrames invoked while already running.");
       Debug.LogError(StackTraceUtility.ExtractStackTrace());
-      return false;
+		yield break;
+		//return false;
     }
 
     // Only run while the video is playing.
