@@ -31,6 +31,7 @@ namespace Mines
 			} else {
 				result = (Tile)available.Pop ();
 				result.gameObject.SetActive (true);
+				result.reset ();
 			}
 
 			return result;

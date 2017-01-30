@@ -57,6 +57,10 @@ namespace Mines
 		private float flashDuration = 3f;
 		private float flashSpeed = 1f;
 
+		public GvrAudioSource explosionSource;
+		public GvrAudioSource beepSource;
+		public GvrAudioSource flagSource;
+
 		public void reset ()
 		{
 			flashSpeed = 1f;
@@ -128,6 +132,7 @@ namespace Mines
 		{
 			if (_field.manager.gameHasStarted) {
 				// Log ("Activate Tile: " + activateTarget.xPosition + ", " + activateTarget.zPosition);
+				flagSource.Play ();
 				if (status != Tile.BlockStatus.FLAGGED) {
 					if (hasMine) {
 						_mine.SetActive (true);
@@ -190,6 +195,8 @@ namespace Mines
 			flagged = status == BlockStatus.CLEARED || status == BlockStatus.DISPLAY ? false : !flagged;
 			_flag.SetActive (flagged);
 			status = flagged ? BlockStatus.FLAGGED : BlockStatus.UNFLAGGED;
+			flagSource.Play ();
+			
 		}
 
 		public void setMine (bool mine)

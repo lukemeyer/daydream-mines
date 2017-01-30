@@ -13,6 +13,7 @@ namespace Mines
 
 		public GameObject menuRoot;
 		public bool gameHasStarted = false;
+		public bool menuVisible = true;
 
 		public SimpleHelvetica sizeDisplay;
 
@@ -42,6 +43,7 @@ namespace Mines
 			field.setMineDensity (Difficulty [currentDifficultyKey]);
 			pool.Init ();
 			field.Init ();
+			ShowMenu ();
 			//updateSizeDisplay ();
 			setMenuSelections ();
 		}
@@ -55,13 +57,25 @@ namespace Mines
 		public void ToggleMenu ()
 		{
 			if (gameHasStarted) {
-				menuRoot.SetActive (!menuRoot.activeSelf);
+				menuVisible = !menuRoot.activeSelf;
+				menuRoot.SetActive (menuVisible);
 			}
+		}
+
+		public void ShowMenu(){
+			menuRoot.SetActive (true);
+			menuVisible = true;
+		}
+
+		public void HideMenu(){
+			menuRoot.SetActive (false);
+			menuVisible = false;
 		}
 
 		public void setSize (string sizeKey)
 		{
 			if (BoardSizes.ContainsKey (sizeKey)) {
+				Debug.Log ("Setting Size to " + sizeKey);
 				currentSizeKey = sizeKey;
 				field.setSize (BoardSizes [currentSizeKey]);
 				field.setTiles ();
@@ -71,6 +85,7 @@ namespace Mines
 		public void setDifficulty (string difKey)
 		{
 			if (Difficulty.ContainsKey (difKey)) {
+				Debug.Log ("Setting Difficulty to " + difKey);
 				currentDifficultyKey = difKey;
 				field.setMineDensity (Difficulty [currentDifficultyKey]);
 			}
@@ -89,26 +104,36 @@ namespace Mines
 			}
 		}
 
-		public void StartGame ()
+		public void StartStartGame (){
+			StartCoroutine (StartGame ());
+		}
+
+		public IEnumerator StartGame ()
 		{
+			Debug.Log ("Starting Game");
 			gameHasStarted = true;
 			field.setSize (BoardSizes [currentSizeKey]);
 			field.setMineDensity (Difficulty [currentDifficultyKey]);
 			field.setTiles ();
-			menuRoot.SetActive (false);
+			yield return new WaitForSeconds (.5f);
+			HideMenu ();
 		}
 
 		public IEnumerator EndGame (bool success, Tile final)
 		{
 			if (success) {
 				// Do winning stuff
-				ToggleMenu ();
+				ShowMenu();
 			} else {
+				gameHasStarted = false;
 				// Do losing stuff
+				final.beepSource.Play();
 				field.blowMines (final.transform.position, true);
 				yield return new WaitForSeconds (3);
+				final.beepSource.Stop ();
+				final.explosionSource.Play ();
 				field.blowMines (final.transform.position, false);
-				ToggleMenu ();
+				ShowMenu ();
 			}
 			gameHasStarted = false;
 		}

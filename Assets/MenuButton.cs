@@ -22,7 +22,7 @@ namespace Mines
 
 		public void setActiveState (bool active)
 		{
-			Debug.Log ("Setting active state of " + key + " to " + active.ToString ());
+			//Debug.Log ("Setting active state of " + key + " to " + active.ToString ());
 			if (ActiveIndicator != null) {
 				//Debug.Log ("Setting button " + key + " " + active.ToString ());
 				ActiveIndicator.SetActive (stickyActive ? true : active);

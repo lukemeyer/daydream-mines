@@ -6,10 +6,13 @@ namespace Mines
 {
 	public class Pointer : MonoBehaviour
 	{
-		public GameObject controllerPivot;
+		//public GameObject controllerPivot;
 		private Clickable lastPointed;
 		private Clickable lastTouched;
 		private Clickable lastClicked;
+
+		public SweeperManager manager;
+		public GvrBasePointerRaycaster caster;
 
 		public UnityEvent onAppButtonUp;
 
@@ -17,29 +20,33 @@ namespace Mines
 
 		void Update ()
 		{
-			UpdatePointer ();
+			//only update when menu is hidden
+			if (manager.gameHasStarted && !manager.menuVisible) {
+				UpdatePointer ();
+			}
 		}
 
 		private void UpdatePointer ()
 		{
+			/*
 			if (GvrController.State != GvrConnectionState.Connected) {
 				controllerPivot.SetActive (false);
 			}
 			controllerPivot.SetActive (true);
 			controllerPivot.transform.rotation = GvrController.Orientation;
-
+			*/
 			// Handle pointing
 			RaycastHit hitInfo;
-			Vector3 rayDirection = GvrController.Orientation * Vector3.forward;
-
-			if (Physics.Raycast (controllerPivot.transform.position, rayDirection, out hitInfo)) {
+			//Vector3 rayDirection = GvrController.Orientation * Vector3.forward;
+			if (Physics.Raycast(caster.GetLastRay(),out hitInfo)){
+			//if (Physics.Raycast (controllerPivot.transform.position, rayDirection, out hitInfo)) {
 				if (hitInfo.collider && hitInfo.collider.gameObject) {
 					pointed (hitInfo.collider.gameObject);
+				} else {
+					resetPointed ();
 				}
 			} else {
-				if (lastPointed != null) {
-					unPointed (lastPointed);
-				}
+				resetPointed ();
 			}
 
 			// Handle Tapping
@@ -98,6 +105,8 @@ namespace Mines
 				// point clickable
 				pointedClick.PointOver ();
 				lastPointed = pointedClick;
+			} else {
+				resetPointed ();
 			}
 		}
 
@@ -105,6 +114,13 @@ namespace Mines
 		void unPointed (Clickable target)
 		{
 			target.PointOff ();
+			lastPointed = null;
+		}
+
+		void resetPointed(){
+			if (lastPointed != null) {
+				unPointed (lastPointed);
+			}
 		}
 	}
 }
