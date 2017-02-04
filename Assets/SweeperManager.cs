@@ -15,7 +15,7 @@ namespace Mines
 		public bool gameHasStarted = false;
 		public bool menuVisible = true;
 
-		public SimpleHelvetica sizeDisplay;
+		public SimpleHelvetica winDisplay;
 
 		private string currentSizeKey = "Small";
 		private string currentDifficultyKey = "Easy";
@@ -48,12 +48,6 @@ namespace Mines
 			setMenuSelections ();
 		}
 
-		public void updateSizeDisplay ()
-		{
-			sizeDisplay.Text = field.fieldWidth.ToString ();
-			sizeDisplay.GenerateText ();
-		}
-
 		public void ToggleMenu ()
 		{
 			if (gameHasStarted) {
@@ -65,6 +59,7 @@ namespace Mines
 		public void ShowMenu(){
 			menuRoot.SetActive (true);
 			menuVisible = true;
+			winDisplay.DisableSelf ();
 		}
 
 		public void HideMenu(){
@@ -115,7 +110,8 @@ namespace Mines
 			field.setSize (BoardSizes [currentSizeKey]);
 			field.setMineDensity (Difficulty [currentDifficultyKey]);
 			field.setTiles ();
-			yield return new WaitForSeconds (.5f);
+			//wait for "start game" sound
+			yield return new WaitForSeconds (.75f);
 			HideMenu ();
 		}
 
@@ -123,6 +119,10 @@ namespace Mines
 		{
 			if (success) {
 				// Do winning stuff
+				winDisplay.EnableSelf();
+				winDisplay.Text = "WINNER!";
+				winDisplay.GenerateText ();
+				yield return new WaitForSeconds (3);
 				ShowMenu();
 			} else {
 				gameHasStarted = false;
@@ -133,6 +133,7 @@ namespace Mines
 				final.beepSource.Stop ();
 				final.explosionSource.Play ();
 				field.blowMines (final.transform.position, false);
+				yield return new WaitForSeconds (2);
 				ShowMenu ();
 			}
 			gameHasStarted = false;
