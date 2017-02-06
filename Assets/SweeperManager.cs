@@ -15,6 +15,7 @@ namespace Mines
 		public bool gameHasStarted = false;
 		public bool menuVisible = true;
 
+		public GameObject msgRoot;
 		public SimpleHelvetica winDisplay;
 
 		private string currentSizeKey = "Small";
@@ -43,6 +44,8 @@ namespace Mines
 			field.setMineDensity (Difficulty [currentDifficultyKey]);
 			pool.Init ();
 			field.Init ();
+			setSize(PlayerPrefs.GetString("size", "Small"));
+			setDifficulty (PlayerPrefs.GetString ("dif", "Easy"));
 			ShowMenu ();
 			//updateSizeDisplay ();
 			setMenuSelections ();
@@ -59,7 +62,8 @@ namespace Mines
 		public void ShowMenu(){
 			menuRoot.SetActive (true);
 			menuVisible = true;
-			winDisplay.DisableSelf ();
+			msgRoot.SetActive (false);
+			setMenuSelections ();
 		}
 
 		public void HideMenu(){
@@ -71,6 +75,7 @@ namespace Mines
 		{
 			if (BoardSizes.ContainsKey (sizeKey)) {
 				Debug.Log ("Setting Size to " + sizeKey);
+				PlayerPrefs.SetString("size", sizeKey);
 				currentSizeKey = sizeKey;
 				field.setSize (BoardSizes [currentSizeKey]);
 				field.setTiles ();
@@ -81,6 +86,7 @@ namespace Mines
 		{
 			if (Difficulty.ContainsKey (difKey)) {
 				Debug.Log ("Setting Difficulty to " + difKey);
+				PlayerPrefs.SetString("dif", difKey);
 				currentDifficultyKey = difKey;
 				field.setMineDensity (Difficulty [currentDifficultyKey]);
 			}
@@ -119,7 +125,7 @@ namespace Mines
 		{
 			if (success) {
 				// Do winning stuff
-				winDisplay.EnableSelf();
+				msgRoot.SetActive(true);
 				winDisplay.Text = "WINNER!";
 				winDisplay.GenerateText ();
 				yield return new WaitForSeconds (3);

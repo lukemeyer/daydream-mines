@@ -25,7 +25,7 @@ namespace Mines
 		public int fieldHeight;
 		public float mineDensity;
 
-		private const float PLAY_AREA_SIZE = 4f;
+		private const float PLAY_AREA_SIZE = 3.8f;
 
 		private const int MAX_WIDTH = 10;
 		private const int MAX_HEIGHT = 10;

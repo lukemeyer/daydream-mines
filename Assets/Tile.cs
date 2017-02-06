@@ -107,18 +107,14 @@ namespace Mines
 
 		public void onPointOver ()
 		{
-			if (_field.manager.gameHasStarted) {
-				if (status != BlockStatus.CLEARED && status != BlockStatus.MINED) {
-					setActive (true);
-				}
+			if (_field.manager.gameHasStarted && canFlag() ) {
+				setActive (true);
 			}
 		}
 
 		public void onPointOff ()
 		{
-			if (_field.manager.gameHasStarted) {
-				setActive (false);
-			}
+			setActive (false);
 		}
 
 		public void onTapped ()
@@ -192,10 +188,12 @@ namespace Mines
 
 		public void toggleFlagged ()
 		{
-			flagged = status == BlockStatus.CLEARED || status == BlockStatus.DISPLAY ? false : !flagged;
-			_flag.SetActive (flagged);
-			status = flagged ? BlockStatus.FLAGGED : BlockStatus.UNFLAGGED;
-			flagSource.Play ();
+			if ( canFlag () ) {
+				flagged = !flagged;
+				_flag.SetActive (flagged);
+				status = flagged ? BlockStatus.FLAGGED : BlockStatus.UNFLAGGED;
+				flagSource.Play ();
+			}
 			
 		}
 
@@ -259,6 +257,17 @@ namespace Mines
 				setText (count.ToString ());
 			} else {
 				setText ("");
+			}
+		}
+
+		private bool canFlag(){
+			switch (status) {
+			case BlockStatus.UNTOUCHED:
+			case BlockStatus.UNFLAGGED:
+			case BlockStatus.FLAGGED:
+				return true;
+			default:
+				return false;
 			}
 		}
 	}
