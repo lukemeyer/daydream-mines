@@ -39,7 +39,7 @@ namespace Mines
 		public bool hasMine = false;
 		public bool flagged = false;
 
-		public SimpleHelvetica display;
+		//public SimpleHelvetica display;
 		public TextMesh display2d;
 
 		public int nearby = 0;
