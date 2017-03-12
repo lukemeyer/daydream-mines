@@ -10,7 +10,12 @@ namespace Mines
 
 		public GameObject BlockPrefab;
 		public GameObject Rig;
-		public SimpleHelvetica headDisplay;
+
+		public GameObject scoreboardRoot;
+		public TextMesh elapsedTimeDisplay;
+		public TextMesh minesLeftDisplay;
+		//public SimpleHelvetica minesDisplay;
+		//public SimpleHelvetica flagsDisplay;
 
 		public Transform Origin;
 		public Transform TextCenter;
@@ -20,6 +25,7 @@ namespace Mines
 		private Tile[] tiles;
 
 		public int totalMines = 1;
+		public int placedFlags = 0;
 
 		public int fieldWidth;
 		public int fieldHeight;
@@ -51,8 +57,14 @@ namespace Mines
 			//Debug.Log ("Setting mine density to " + density.ToString());
 		}
 
-		public void setText (string newText)
+		public void updateScoreboard ()
 		{
+			string minesLeft = (totalMines - placedFlags).ToString ();
+			if (minesLeftDisplay.text != minesLeft) {
+				minesLeftDisplay.text = minesLeft;
+			}
+
+			/*
 			headDisplay.Text = newText;
 			headDisplay.GenerateText ();
 			//Debug.Log (headDisplay.transform.GetComponent<MeshRenderer> ().bounds.center);
@@ -77,6 +89,7 @@ namespace Mines
 				Vector3 delta = TextCenter.position - center;
 				headDisplay.transform.position = headDisplay.transform.position + delta;
 			}
+			*/
 		}
 
 		public void setTiles ()
@@ -91,7 +104,9 @@ namespace Mines
 			Origin.localScale = Vector3.one * scale;
 			Origin.localPosition = new Vector3 (offsetX, 0f, offsetY);
 
-			setText ("");
+			scoreboardRoot.transform.localPosition = Origin.localPosition + new Vector3((fieldWidth + .5f) * scale,0f, 0f);
+
+			//setText ("");
 			pool.ReturnAll ();
 
 			tiles = new Tile[fieldWidth * fieldHeight];
@@ -142,16 +157,20 @@ namespace Mines
 					Debug.Log ("Trying to update invalid tile, index " + i.ToString ());
 				}
 			}
+			placedFlags = 0;
 			//Debug.Log ("Set took " + (Time.realtimeSinceStartup - start).ToString () + " seconds");
+			updateScoreboard();
 		}
 
 		public void updateScore ()
 		{
 			int untouched = 0;
 			int flagged = 0;
+			bool lost = false;
 			for (int i = 0; i < tiles.Length; i++) {
 				if (tiles [i].status == Tile.BlockStatus.MINED) {
 					//setText ("GAME OVER");
+					lost = true;
 					StartCoroutine (manager.EndGame (false, tiles [i]));
 					break;
 				} else if (tiles [i].status == Tile.BlockStatus.UNTOUCHED) {
@@ -160,9 +179,13 @@ namespace Mines
 					flagged++;
 				}
 			}
-			if (untouched + flagged == totalMines) {
-				//setText ("WINNER");
-				StartCoroutine (manager.EndGame (true, null));
+			if (!lost) {
+				if (untouched + flagged == totalMines) {
+					//setText ("WINNER");
+					StartCoroutine (manager.EndGame (true, null));
+				}
+				placedFlags = flagged;
+				updateScoreboard ();
 			}
 		}
 

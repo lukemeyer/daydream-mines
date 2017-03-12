@@ -16,10 +16,17 @@ namespace Mines
 		public bool menuVisible = true;
 
 		public GameObject msgRoot;
-		public SimpleHelvetica winDisplay;
+		//public SimpleHelvetica winDisplay;
 
 		private string currentSizeKey = "Small";
 		private string currentDifficultyKey = "Easy";
+
+		public TextMesh bestTime;
+		public TextMesh mines;
+		public TextMesh fieldSize;
+
+		private bool clockIsRunning = false;
+		private float elapsedTime = 0f;
 
 		public Dictionary<string,int[]> BoardSizes = new Dictionary<string, int[]> () {
 			{ "Small", new int[]{ 4, 5 } },
@@ -51,6 +58,13 @@ namespace Mines
 			setMenuSelections ();
 		}
 
+		void Update (){
+			if (clockIsRunning) {
+				elapsedTime += Time.deltaTime;
+				field.elapsedTimeDisplay.text = SweeperManager.FormatDuration (elapsedTime);
+			}
+		}
+
 		public void ToggleMenu ()
 		{
 			if (gameHasStarted) {
@@ -60,6 +74,7 @@ namespace Mines
 		}
 
 		public void ShowMenu(){
+			clockIsRunning = false;
 			menuRoot.SetActive (true);
 			menuVisible = true;
 			msgRoot.SetActive (false);
@@ -67,6 +82,9 @@ namespace Mines
 		}
 
 		public void HideMenu(){
+			if (gameHasStarted) {
+				clockIsRunning = true;
+			}
 			menuRoot.SetActive (false);
 			menuVisible = false;
 		}
@@ -89,11 +107,21 @@ namespace Mines
 				PlayerPrefs.SetString("dif", difKey);
 				currentDifficultyKey = difKey;
 				field.setMineDensity (Difficulty [currentDifficultyKey]);
+				field.setTiles ();
 			}
 		}
 
 		public void setMenuSelections ()
 		{
+			float currentBest = PlayerPrefs.GetFloat (currentDifficultyKey + "_" + currentSizeKey + "_Time", 0f);
+			if (currentBest > 0f) {
+				bestTime.text = SweeperManager.FormatDuration (currentBest);
+			} else {
+				bestTime.text = "--";
+			}
+			mines.text = Mathf.FloorToInt ((BoardSizes [currentSizeKey] [0] * BoardSizes [currentSizeKey] [1]) * Difficulty [currentDifficultyKey]).ToString ();
+			fieldSize.text = BoardSizes [currentSizeKey] [0] + " x " + BoardSizes [currentSizeKey] [1];
+
 			foreach (var button in difficultyButtons) {
 				button.stickyActive = button.key == currentDifficultyKey;
 				button.setActiveState (button.stickyActive);
@@ -113,6 +141,7 @@ namespace Mines
 		{
 			Debug.Log ("Starting Game");
 			gameHasStarted = true;
+			elapsedTime = 0f;
 			field.setSize (BoardSizes [currentSizeKey]);
 			field.setMineDensity (Difficulty [currentDifficultyKey]);
 			field.setTiles ();
@@ -123,11 +152,19 @@ namespace Mines
 
 		public IEnumerator EndGame (bool success, Tile final)
 		{
+			clockIsRunning = false;
+
 			if (success) {
 				// Do winning stuff
+
+				//Save Game Stats
+				if (PlayerPrefs.GetFloat (currentDifficultyKey + "_" + currentSizeKey + "_Time", float.MaxValue) > elapsedTime) {
+					PlayerPrefs.SetFloat (currentDifficultyKey + "_" + currentSizeKey + "_Time", elapsedTime);
+				}
+
 				msgRoot.SetActive(true);
-				winDisplay.Text = "WINNER!";
-				winDisplay.GenerateText ();
+				//winDisplay.Text = "WINNER!";
+				//winDisplay.GenerateText ();
 				yield return new WaitForSeconds (3);
 				ShowMenu();
 			} else {
@@ -143,6 +180,11 @@ namespace Mines
 				ShowMenu ();
 			}
 			gameHasStarted = false;
+		}
+
+		public static string FormatDuration ( float duration ) {
+			System.TimeSpan span = System.TimeSpan.FromSeconds (duration);
+			return span.Minutes.ToString ("D2") + ":" + span.Seconds.ToString ("D2");
 		}
 	}
 }

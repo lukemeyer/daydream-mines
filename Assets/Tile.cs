@@ -40,6 +40,7 @@ namespace Mines
 		public bool flagged = false;
 
 		public SimpleHelvetica display;
+		public TextMesh display2d;
 
 		public int nearby = 0;
 		public Tile[] neighbors;
@@ -54,7 +55,7 @@ namespace Mines
 
 		public bool isFlashing = false;
 		private float flashStartTime = 0f;
-		private float flashDuration = 3f;
+		//private float flashDuration = 3f;
 		private float flashSpeed = 1f;
 
 		public GvrAudioSource explosionSource;
@@ -107,7 +108,7 @@ namespace Mines
 
 		public void onPointOver ()
 		{
-			if (_field.manager.gameHasStarted && canFlag() ) {
+			if (_field.manager.gameHasStarted && canActivate() ) {
 				setActive (true);
 			}
 		}
@@ -144,11 +145,15 @@ namespace Mines
 		public void setText (string newText)
 		{
 			if (newText.Length > 0) {
+				/*
 				display.gameObject.SetActive (true);
 				display.Text = newText;
 				display.GenerateText ();
+				*/
+				display2d.text = newText;
 			} else {
-				display.gameObject.SetActive (false);
+				//display.gameObject.SetActive (false);
+				display2d.text = " ";
 			}
 		}
 
@@ -170,7 +175,7 @@ namespace Mines
 					_block.transform.localPosition = clearedPosition;
 					status = BlockStatus.CLEARED;
 					if (flagged) {
-						toggleFlagged ();
+						toggleFlagged (true);
 					}
 					if (nearby == 0) {
 						for (int i = 0; i < neighbors.Length; i++) {
@@ -186,15 +191,18 @@ namespace Mines
 			}
 		}
 
-		public void toggleFlagged ()
+		public void toggleFlagged(){
+			toggleFlagged (false);
+		}
+		public void toggleFlagged ( bool force )
 		{
-			if ( canFlag () ) {
+			if ( canFlag () || force ) {
 				flagged = !flagged;
 				_flag.SetActive (flagged);
 				status = flagged ? BlockStatus.FLAGGED : BlockStatus.UNFLAGGED;
 				flagSource.Play ();
+				_field.updateScore ();
 			}
-			
 		}
 
 		public void setMine (bool mine)
@@ -260,13 +268,21 @@ namespace Mines
 			}
 		}
 
+		private bool canActivate(){
+			return status == BlockStatus.UNTOUCHED || canFlag ();
+		}
+
 		private bool canFlag(){
-			switch (status) {
-			case BlockStatus.UNTOUCHED:
-			case BlockStatus.UNFLAGGED:
-			case BlockStatus.FLAGGED:
-				return true;
-			default:
+			if (_field.placedFlags < _field.totalMines) {
+				switch (status) {
+				case BlockStatus.UNTOUCHED:
+				case BlockStatus.UNFLAGGED:
+				case BlockStatus.FLAGGED:
+					return true;
+				default:
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}
