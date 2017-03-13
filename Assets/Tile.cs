@@ -193,6 +193,7 @@ namespace Mines
 
 		public void toggleFlagged(){
 			toggleFlagged (false);
+			Firebase.Analytics.FirebaseAnalytics.SetUserProperty("flag_user", "true");
 		}
 		public void toggleFlagged ( bool force )
 		{

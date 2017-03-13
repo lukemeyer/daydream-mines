@@ -92,7 +92,7 @@ namespace Mines
 		public void setSize (string sizeKey)
 		{
 			if (BoardSizes.ContainsKey (sizeKey)) {
-				Debug.Log ("Setting Size to " + sizeKey);
+				//Debug.Log ("Setting Size to " + sizeKey);
 				PlayerPrefs.SetString("size", sizeKey);
 				currentSizeKey = sizeKey;
 				field.setSize (BoardSizes [currentSizeKey]);
@@ -103,7 +103,7 @@ namespace Mines
 		public void setDifficulty (string difKey)
 		{
 			if (Difficulty.ContainsKey (difKey)) {
-				Debug.Log ("Setting Difficulty to " + difKey);
+				//Debug.Log ("Setting Difficulty to " + difKey);
 				PlayerPrefs.SetString("dif", difKey);
 				currentDifficultyKey = difKey;
 				field.setMineDensity (Difficulty [currentDifficultyKey]);
@@ -139,7 +139,15 @@ namespace Mines
 
 		public IEnumerator StartGame ()
 		{
-			Debug.Log ("Starting Game");
+			//Debug.Log ("Starting Game");
+
+			Firebase.Analytics.Parameter[] postParams = {
+				new Firebase.Analytics.Parameter(Firebase.Analytics.FirebaseAnalytics.ParameterContentType, "Level"),
+				new Firebase.Analytics.Parameter(Firebase.Analytics.FirebaseAnalytics.ParameterItemId, currentSizeKey + "_" + currentDifficultyKey)
+			};
+			Firebase.Analytics.FirebaseAnalytics.LogEvent (Firebase.Analytics.FirebaseAnalytics.EventSelectContent, postParams);
+
+
 			gameHasStarted = true;
 			elapsedTime = 0f;
 			field.setSize (BoardSizes [currentSizeKey]);
@@ -161,6 +169,11 @@ namespace Mines
 				if (PlayerPrefs.GetFloat (currentDifficultyKey + "_" + currentSizeKey + "_Time", float.MaxValue) > elapsedTime) {
 					PlayerPrefs.SetFloat (currentDifficultyKey + "_" + currentSizeKey + "_Time", elapsedTime);
 				}
+				Firebase.Analytics.Parameter[] postParams = {
+					new Firebase.Analytics.Parameter(Firebase.Analytics.FirebaseAnalytics.ParameterLevel, currentSizeKey + "_" + currentDifficultyKey),
+					new Firebase.Analytics.Parameter(Firebase.Analytics.FirebaseAnalytics.ParameterScore, elapsedTime)
+				};
+				Firebase.Analytics.FirebaseAnalytics.LogEvent (Firebase.Analytics.FirebaseAnalytics.EventPostScore, postParams);
 
 				msgRoot.SetActive(true);
 				//winDisplay.Text = "WINNER!";

@@ -14,7 +14,7 @@ namespace Mines
 
 		public void Init ()
 		{
-			Debug.Log ("Starting Pool");
+			//Debug.Log ("Starting Pool");
 			available = new Stack (intialCapacity);
 			all = new ArrayList (intialCapacity);
 			FillPool (intialCapacity);
@@ -50,7 +50,7 @@ namespace Mines
 
 		public void FillPool (int capacity)
 		{
-			Debug.Log ("Filling pool with " + capacity + " tiles.");
+			//Debug.Log ("Filling pool with " + capacity + " tiles.");
 			Tile[] temp = new Tile[capacity];
 			for (int i = 0; i < temp.Length; i++) {
 				temp [i] = GetTile ();
